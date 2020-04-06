@@ -81,7 +81,9 @@ class PostSerializer < BasicPostSerializer
              :excerpt,
              :reviewable_id,
              :reviewable_score_count,
-             :reviewable_score_pending_count
+             :reviewable_score_pending_count,
+             :uploads,
+             :image_urls
 
   def initialize(object, opts)
     super(object, opts)
@@ -95,6 +97,10 @@ class PostSerializer < BasicPostSerializer
 
   def topic_slug
     topic&.slug
+  end
+
+  def image_urls
+    uploads.map(&:to_s) if uploads.any?
   end
 
   def include_topic_title?

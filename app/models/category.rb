@@ -35,7 +35,7 @@ class Category < ActiveRecord::Base
   belongs_to :uploaded_logo, class_name: "Upload"
   belongs_to :uploaded_background, class_name: "Upload"
 
-  has_many :topics
+  has_many :topics, dependent: :destroy
   has_many :category_users
   has_many :category_featured_topics
   has_many :featured_topics, through: :category_featured_topics, source: :topic
@@ -43,6 +43,7 @@ class Category < ActiveRecord::Base
   has_many :category_groups, dependent: :destroy
   has_many :groups, through: :category_groups
   has_many :topic_timers, dependent: :destroy
+  has_many :posts, through: :topics, dependent: :destroy
 
   has_and_belongs_to_many :web_hooks
 

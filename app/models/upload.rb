@@ -47,7 +47,17 @@ class Upload < ActiveRecord::Base
   scope :by_users, -> { where("uploads.id > ?", SEEDED_ID_THRESHOLD) }
 
   def to_s
-    self.url
+    if SiteSetting.secure_media? && "https:#{self.url}".include?(Discourse.store.s3_upload_host)
+      url = "https:#{self.url}"
+      uri = URI.parse(url)
+      if FileHelper.is_supported_media?(File.basename(uri.path))
+        raw = url.sub(Discourse.store.s3_upload_host, "#{Discourse.base_url}/#{Upload::SECURE_MEDIA_ROUTE}")
+      end
+    else
+      raw = "#{Discourse.base_url}#{self.url}"
+    end
+
+    raw
   end
 
   def thumbnail(width = self.thumbnail_width, height = self.thumbnail_height)

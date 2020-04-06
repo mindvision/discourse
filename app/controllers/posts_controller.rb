@@ -17,7 +17,8 @@ class PostsController < ApplicationController
     :markdown_num,
     :cooked,
     :latest,
-    :user_posts_feed
+    :user_posts_feed,
+    :image_upload
   ]
 
   skip_before_action :preload_json, :check_xhr, only: [
@@ -25,7 +26,8 @@ class PostsController < ApplicationController
     :markdown_num,
     :short_link,
     :latest,
-    :user_posts_feed
+    :user_posts_feed,
+    :image_upload
   ]
 
   def markdown_id
@@ -135,6 +137,42 @@ class PostsController < ApplicationController
       end
     end
 
+  end
+
+  def image_upload
+    if params[:username].present?
+      user = fetch_user_from_params
+      posts = user.posts.public_posts
+    elsif params[:external_id].present?
+      user = SingleSignOnRecord.find_by(external_id: external_id).try(:user)
+      posts = user.posts.public_posts
+    elsif params[:category_id].present?
+      category = Category.find_by(id: params[:category_id])
+      posts = category.posts.public_posts
+    else
+      posts = Post.public_posts
+    end
+
+    posts = posts.have_images
+              .where(user_id: user.id)
+              .where(post_type: Post.types[:regular])
+              .order(created_at: :desc)
+              .includes(:user)
+              .includes(topic: :category)
+              .includes(:uploads)
+              .limit(50)
+
+    posts = posts.reject { |post| !guardian.can_see?(post) || post.topic.blank? }
+
+    respond_to do |format|
+      format.json do
+        render_json_dump(serialize_data(posts,
+                                        PostSerializer,
+                                        scope: guardian,
+                                        add_excerpt: true)
+        )
+      end
+    end
   end
 
   def cooked

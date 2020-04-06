@@ -118,6 +118,20 @@ class Post < ActiveRecord::Base
         )
   }
 
+  scope :have_images, -> {
+    where("
+          (
+            posts.cooked LIKE '%<img %'
+          ) AND (
+            posts.cooked LIKE ? OR
+            posts.cooked LIKE '%/original/%' OR
+            posts.cooked LIKE '%/optimized/%' OR
+            posts.cooked LIKE '%data-orig-src=%' OR
+            posts.cooked LIKE '%/uploads/short-url/%'
+          )", "%/uploads/#{RailsMultisite::ConnectionManagement.current_db}/%"
+    )
+  }
+
   delegate :username, to: :user
 
   def self.hidden_reasons
