@@ -53,6 +53,8 @@ class Upload < ActiveRecord::Base
       if FileHelper.is_supported_media?(File.basename(uri.path))
         raw = url.sub(Discourse.store.s3_upload_host, "#{Discourse.base_url}/#{Upload::SECURE_MEDIA_ROUTE}")
       end
+    elsif SiteSetting.Upload.enable_s3_uploads
+      raw = "https:#{self.url}"
     else
       raw = "#{Discourse.base_url}#{self.url}"
     end
