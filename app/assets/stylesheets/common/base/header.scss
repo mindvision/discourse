@@ -17,6 +17,7 @@
       height: 100%;
       background-size: cover;
       background-image: url('../images/discourse_header.png');
+      background-position: center;
 
       .header-row {
         width: 100%;
@@ -244,7 +245,7 @@
     animation: fadein 0.5s;
   }
   .topic-link {
-    color: $header_primary;
+    color: white;
     display: block;
     @include ellipsis;
   }
@@ -291,7 +292,7 @@
     &.bar,
     &.none {
       span.badge-category {
-        color: $header_primary-high;
+        color: #c0c0c0;
       }
     }
   }
@@ -300,7 +301,7 @@
     align-items: center;
     max-width: 100%;
     .discourse-tags {
-      color: $header_primary-high;
+      color: #c0c0c0;
       @include ellipsis;
       .discourse-tag {
         display: inline; // tags need to stay inline in order for them to truncate

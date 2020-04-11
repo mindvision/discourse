@@ -144,7 +144,7 @@ class PostsController < ApplicationController
       user = fetch_user_from_params
       posts = user.posts.public_posts
     elsif params[:external_id].present?
-      user = SingleSignOnRecord.find_by(external_id: external_id).try(:user)
+      user = SingleSignOnRecord.find_by(external_id: params[:external_id]).try(:user)
       posts = user.posts.public_posts
     elsif params[:category_id].present?
       category = Category.find_by(id: params[:category_id])
@@ -154,13 +154,12 @@ class PostsController < ApplicationController
     end
 
     posts = posts.have_images
-              .where(user_id: user.id)
               .where(post_type: Post.types[:regular])
               .order(created_at: :desc)
               .includes(:user)
               .includes(topic: :category)
               .includes(:uploads)
-              .limit(50)
+              .limit(25)
 
     posts = posts.reject { |post| !guardian.can_see?(post) || post.topic.blank? }
 
