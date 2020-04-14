@@ -471,6 +471,8 @@ module ApplicationHelper
       highlight_js_path: HighlightJs.path,
       svg_sprite_path: SvgSprite.path(theme_ids),
       enable_js_error_reporting: GlobalSetting.enable_js_error_reporting,
+      scout_return_path: "#{ ENV['SCOUT_RETURN_URL'].presence ||
+        'http://deploy.sa-myscout-home.oz.to' }/members/discourse_return_page"
     }
 
     if Rails.env.development?

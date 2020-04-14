@@ -30,6 +30,7 @@
   Discourse.LetterAvatarVersion = setupData.letterAvatarVersion;
   Discourse.MarkdownItURL = setupData.markdownItUrl;
   Discourse.ServiceWorkerURL = setupData.serviceWorkerUrl;
+  Discourse.ScoutReturnPath = setupData.scoutReturnPath;
   I18n.defaultLocale = setupData.defaultLocale;
   Discourse.start();
   Discourse.set("assetVersion", setupData.assetVersion);

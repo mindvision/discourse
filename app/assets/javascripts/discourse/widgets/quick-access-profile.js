@@ -25,6 +25,7 @@ createWidgetFrom(QuickAccessPanel, "quick-access-profile", {
     if (this._showToggleAnonymousButton()) {
       items.push(this._toggleAnonymousButton());
     }
+    items.push(this._myScoutButton());
     if (this.attrs.showLogoutButton) {
       items.push(this._logOutButton());
     }
@@ -100,5 +101,13 @@ createWidgetFrom(QuickAccessPanel, "quick-access-profile", {
           this.siteSettings.anonymous_posting_min_trust_level) ||
       this.currentUser.is_anonymous
     );
-  }
+  },
+
+  _myScoutButton() {
+    return {
+      icon: "flag",
+      href: Discourse.ScoutReturnPath,
+      content: 'Back To MyScout'
+    };
+  },
 });
