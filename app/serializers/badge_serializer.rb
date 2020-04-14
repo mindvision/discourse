@@ -2,7 +2,7 @@
 
 class BadgeSerializer < ApplicationSerializer
   attributes :id, :name, :description, :grant_count, :allow_title,
-             :multiple_grant, :icon, :image, :listable, :enabled, :badge_grouping_id,
+             :multiple_grant, :icon, :image, :listable, :enabled, :badge_grouping_id, :badge_grouping_name,
              :system, :long_description, :slug, :has_badge, :manually_grantable?
 
   has_one :badge_type
@@ -25,5 +25,9 @@ class BadgeSerializer < ApplicationSerializer
 
   def name
     object.display_name
+  end
+
+  def badge_grouping_name
+    object&.badge_grouping&.name.to_s
   end
 end

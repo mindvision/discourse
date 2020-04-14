@@ -42,7 +42,7 @@ class UserBadgesController < ApplicationController
 
     user_badges = user_badges.includes(badge: [:badge_grouping, :badge_type])
       .includes(post: :topic)
-      .includes(:granted_by)
+      .includes(:granted_by).order('badges.badge_grouping_id, granted_at DESC')
 
     render_serialized(user_badges, DetailedUserBadgeSerializer, root: :user_badges)
   end
