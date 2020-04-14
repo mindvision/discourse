@@ -161,7 +161,7 @@ class Guardian
   end
 
   def can_moderate?(obj)
-    obj && authenticated? && !is_silenced? && (is_staff? || (obj.is_a?(Topic) && @user.has_trust_level?(TrustLevel[4])))
+    obj && authenticated? && !is_silenced? && (is_staff? || (obj.is_a?(Topic) && @user.has_trust_level?(TrustLevel[3])))
   end
   alias :can_move_posts? :can_moderate?
   alias :can_see_flags? :can_moderate?
@@ -182,7 +182,7 @@ class Guardian
   end
 
   def can_grant_badges?(_user)
-    SiteSetting.enable_badges && is_staff?
+    SiteSetting.enable_badges && (is_staff? || user.has_trust_level?(TrustLevel[4]))
   end
 
   def can_delete_reviewable_queued_post?(reviewable)
@@ -370,8 +370,6 @@ class Guardian
         end
       end
     end
-
-    user.has_trust_level?(TrustLevel[2])
   end
 
   def can_invite_via_email?(object)
@@ -459,7 +457,7 @@ class Guardian
 
   def can_mute_users?
     return false if anonymous?
-    @user.staff? || @user.trust_level >= TrustLevel.levels[:basic]
+    @user.staff?
   end
 
   def can_ignore_user?(target_user)
@@ -468,7 +466,7 @@ class Guardian
 
   def can_ignore_users?
     return false if anonymous?
-    @user.staff? || @user.trust_level >= TrustLevel.levels[:member]
+    @user.staff?
   end
 
   def allow_themes?(theme_ids, include_preview: false)

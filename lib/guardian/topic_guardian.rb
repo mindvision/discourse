@@ -136,7 +136,9 @@ module TopicGuardian
   end
 
   def can_reply_as_new_topic?(topic)
-    authenticated? && topic && @user.has_trust_level?(TrustLevel[1])
+    # TODO: turn this one on again if needed
+    # authenticated? && topic && @user.has_trust_level?(TrustLevel[1])
+    false
   end
 
   def can_see_deleted_topics?

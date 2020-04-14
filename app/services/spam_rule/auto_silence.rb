@@ -22,7 +22,7 @@ class SpamRule::AutoSilence
   def should_autosilence?
     return false if @user.blank?
     return false if @user.staged?
-    return false if @user.has_trust_level?(TrustLevel[1])
+    return false if @user.has_trust_level?(TrustLevel[0])
 
     SiteSetting.num_users_to_silence_new_user > 0 &&
       user_spam_stats.total_spam_score >= Reviewable.spam_score_to_silence_new_user &&

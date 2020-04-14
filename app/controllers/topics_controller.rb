@@ -408,7 +408,9 @@ class TopicsController < ApplicationController
     check_for_status_presence(:status, status)
     @topic = Topic.find_by(id: topic_id)
     guardian.ensure_can_moderate!(@topic)
-    @topic.update_status(status, enabled, current_user, until: params[:until])
+    if guardian.is_staff? || (!guardian.is_staff? && status.to_s != 'unlisted')
+      @topic.update_status(status, enabled, current_user, until: params[:until])
+    end
 
     render json: success_json.merge!(
       topic_status_update: TopicTimerSerializer.new(
@@ -903,7 +905,7 @@ class TopicsController < ApplicationController
 
   def reset_bump_date
     params.require(:id)
-    guardian.ensure_can_update_bumped_at!
+    guardian.ensure_can_update_bumped_at! && guardian.is_staff?
 
     topic = Topic.find_by(id: params[:id])
     raise Discourse::NotFound.new unless topic
