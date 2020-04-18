@@ -244,7 +244,7 @@ class Middleware::RequestTracker
       limiter10 = RateLimiter.new(
         nil,
         "global_ip_limit_10_#{ip}",
-        GlobalSetting.max_reqs_per_ip_per_10_seconds,
+        2000000000,
         10,
         global: true
       )
@@ -252,7 +252,7 @@ class Middleware::RequestTracker
       limiter60 = RateLimiter.new(
         nil,
         "global_ip_limit_60_#{ip}",
-        GlobalSetting.max_reqs_per_ip_per_minute,
+        2000000000,
         60,
         global: true
       )
@@ -260,7 +260,7 @@ class Middleware::RequestTracker
       limiter_assets10 = RateLimiter.new(
         nil,
         "global_ip_limit_10_assets_#{ip}",
-        GlobalSetting.max_asset_reqs_per_ip_per_10_seconds,
+        2000000000,
         10,
         global: true
       )
