@@ -45,7 +45,7 @@ class CategoryList
 
   def self.order_categories(categories)
     if SiteSetting.fixed_category_positions
-      categories.order(:name)
+      categories.order(:position, :name)
     else
       allowed_category_ids = categories.pluck(:id) << nil # `nil` is necessary to include categories without any associated topics
       categories.left_outer_joins(:featured_topics)

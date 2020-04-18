@@ -300,6 +300,7 @@ class CategoriesController < ApplicationController
         *required_param_keys,
         :position,
         :email_in,
+        :description,
         :email_in_allow_strangers,
         :mailinglist_mirror,
         :all_topics_wiki,
