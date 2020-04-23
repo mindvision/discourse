@@ -1,4 +1,5 @@
-import { next } from "@ember/runloop";
+import { schedule } from "@ember/runloop";
+import { action } from "@ember/object";
 import Component from "@ember/component";
 /* global Pikaday:true */
 import loadScript from "discourse/lib/load-script";
@@ -16,25 +17,30 @@ export default Component.extend({
 
   @on("didInsertElement")
   _loadDatePicker() {
-    const container = this.element.querySelector(`#${this.containerId}`);
+    schedule("afterRender", () => {
+      const container = this.element.querySelector(`#${this.containerId}`);
 
-    if (this.site.mobileView) {
-      this._loadNativePicker(container);
-    } else {
-      this._loadPikadayPicker(container);
-    }
+      if (this.site.mobileView) {
+        this._loadNativePicker(container);
+      } else {
+        this._loadPikadayPicker(container);
+      }
 
-    if (this.date && this._picker) {
-      this._picker.setDate(this.date, true);
-    }
+      if (this._picker && this.date) {
+        this._picker.setDate(moment(this.date).toDate(), true);
+      }
+    });
   },
 
   didUpdateAttrs() {
     this._super(...arguments);
 
-    if (this._picker && typeof this.date === "string") {
-      const [year, month, day] = this.date.split("-").map(x => parseInt(x, 10));
-      this._picker.setDate(new Date(year, month - 1, day), true);
+    if (this._picker && this.date) {
+      this._picker.setDate(moment(this.date).toDate(), true);
+    }
+
+    if (this._picker && this.relativeDate) {
+      this._picker.setMinDate(moment(this.relativeDate).toDate(), true);
     }
 
     if (this._picker && !this.date) {
@@ -44,26 +50,32 @@ export default Component.extend({
 
   _loadPikadayPicker(container) {
     loadScript("/javascripts/pikaday.js").then(() => {
-      next(() => {
-        const default_opts = {
-          field: this.element.querySelector(".date-picker"),
-          container: container || this.element,
-          bound: container === null,
-          format: "LL",
-          firstDay: 1,
-          i18n: {
-            previousMonth: I18n.t("dates.previous_month"),
-            nextMonth: I18n.t("dates.next_month"),
-            months: moment.months(),
-            weekdays: moment.weekdays(),
-            weekdaysShort: moment.weekdaysShort()
-          },
-          onSelect: date => this._handleSelection(date)
-        };
+      let defaultOptions = {
+        field: this.element.querySelector(".date-picker"),
+        container: container || this.element.querySelector(".picker-container"),
+        bound: container === null,
+        format: "LL",
+        firstDay: 1,
+        i18n: {
+          previousMonth: I18n.t("dates.previous_month"),
+          nextMonth: I18n.t("dates.next_month"),
+          months: moment.months(),
+          weekdays: moment.weekdays(),
+          weekdaysShort: moment.weekdaysShort()
+        },
+        onSelect: date => this._handleSelection(date)
+      };
 
-        this._picker = new Pikaday(Object.assign(default_opts, this._opts()));
-        this._picker.setDate(this.date, true);
-      });
+      if (this.relativeDate) {
+        defaultOptions = Object.assign({}, defaultOptions, {
+          minDate: moment(this.relativeDate).toDate()
+        });
+      }
+
+      this._picker = new Pikaday(
+        Object.assign({}, defaultOptions, this._opts())
+      );
+      this._picker.setDate(moment(this.date).toDate(), true);
     });
   },
 
@@ -78,18 +90,23 @@ export default Component.extend({
       /* do nothing for native */
     };
     picker.setDate = date => {
-      picker.value = date;
+      picker.value = moment(date).format("YYYY-MM-DD");
+    };
+    picker.setMinDate = date => {
+      picker.min = date;
     };
     this._picker = picker;
+
+    if (this.date) {
+      picker.setDate(this.date);
+    }
   },
 
   _handleSelection(value) {
     if (!this.element || this.isDestroying || this.isDestroyed) return;
 
-    this._picker && this._picker.hide();
-
     if (this.onChange) {
-      this.onChange(value);
+      this.onChange(value ? moment(value) : null);
     }
   },
 
@@ -97,8 +114,8 @@ export default Component.extend({
   _destroy() {
     if (this._picker) {
       this._picker.destroy();
+      this._picker = null;
     }
-    this._picker = null;
   },
 
   @discourseComputed()
@@ -110,9 +127,8 @@ export default Component.extend({
     return null;
   },
 
-  actions: {
-    onInput(event) {
-      this._picker && this._picker.setDate(event.target.value, true);
-    }
+  @action
+  onChangeDate(event) {
+    this._handleSelection(event.target.value);
   }
 });

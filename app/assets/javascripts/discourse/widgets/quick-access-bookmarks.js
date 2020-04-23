@@ -16,11 +16,7 @@ createWidgetFrom(QuickAccessPanel, "quick-access-bookmarks", {
   },
 
   showAllHref() {
-    if (this.siteSettings.enable_bookmarks_with_reminders) {
-      return `${this.attrs.path}/activity/bookmarks-with-reminders`;
-    } else {
-      return `${this.attrs.path}/activity/bookmarks`;
-    }
+    return `${this.attrs.path}/activity/bookmarks-with-reminders`;
   },
 
   emptyStatePlaceholderItem() {
@@ -28,11 +24,7 @@ createWidgetFrom(QuickAccessPanel, "quick-access-bookmarks", {
   },
 
   findNewItems() {
-    if (this.siteSettings.enable_bookmarks_with_reminders) {
-      return this.loadBookmarksWithReminders();
-    } else {
-      return this.loadUserActivityBookmarks();
-    }
+    return this.loadBookmarksWithReminders();
   },
 
   itemHtml(bookmark) {
@@ -62,6 +54,8 @@ createWidgetFrom(QuickAccessPanel, "quick-access-bookmarks", {
         limit: this.estimateItemLimit()
       }
     }).then(result => {
+      result = result.user_bookmark_list;
+
       // The empty state help text for bookmarks page is localized on the
       // server.
       if (result.no_results_help) {

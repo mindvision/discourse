@@ -18,13 +18,13 @@ else
   # this allows us to include the bits of rails we use without pieces we do not.
   #
   # To issue a rails update bump the version number here
-  gem 'actionmailer', '6.0.1'
-  gem 'actionpack', '6.0.1'
-  gem 'actionview', '6.0.1'
-  gem 'activemodel', '6.0.1'
-  gem 'activerecord', '6.0.1'
-  gem 'activesupport', '6.0.1'
-  gem 'railties', '6.0.1'
+  gem 'actionmailer', '6.0.2.2'
+  gem 'actionpack', '6.0.2.2'
+  gem 'actionview', '6.0.2.2'
+  gem 'activemodel', '6.0.2.2'
+  gem 'activerecord', '6.0.2.2'
+  gem 'activesupport', '6.0.2.2'
+  gem 'railties', '6.0.2.2'
   gem 'sprockets-rails'
 end
 
@@ -160,10 +160,7 @@ group :test, :development do
   gem 'listen', require: false
   gem 'certified', require: false
   gem 'fabrication', require: false
-
-  # TODO: upgrading to 1.10.1 cause it breaks our test suite.
-  # We want our test suite fixed though to support this upgrade.
-  gem 'mocha', '1.8.0', require: false
+  gem 'mocha', require: false
 
   gem 'rb-fsevent', require: RUBY_PLATFORM =~ /darwin/i ? 'rb-fsevent' : false
 

@@ -75,6 +75,7 @@ class Category < ActiveRecord::Base
   after_save :publish_discourse_stylesheet
   after_save :publish_category
   after_save :reset_topic_ids_cache
+  after_save :clear_subcategory_ids
   after_save :clear_url_cache
   after_save :index_search
   after_save :update_reviewables
@@ -152,6 +153,38 @@ class Category < ActiveRecord::Base
 
   def reset_topic_ids_cache
     Category.reset_topic_ids_cache
+  end
+
+  @@subcategory_ids = DistributedCache.new('subcategory_ids')
+
+  def self.subcategory_ids(category_id)
+    @@subcategory_ids[category_id] ||=
+      begin
+        sql = <<~SQL
+            WITH RECURSIVE subcategories AS (
+                SELECT :category_id id, 1 depth
+                UNION
+                SELECT categories.id, (subcategories.depth + 1) depth
+                FROM categories
+                JOIN subcategories ON subcategories.id = categories.parent_category_id
+                WHERE subcategories.depth < :max_category_nesting
+            )
+            SELECT id FROM subcategories
+          SQL
+        DB.query_single(
+          sql,
+          category_id: category_id,
+          max_category_nesting: SiteSetting.max_category_nesting
+        )
+      end
+  end
+
+  def self.clear_subcategory_ids
+    @@subcategory_ids.clear
+  end
+
+  def clear_subcategory_ids
+    Category.clear_subcategory_ids
   end
 
   def self.scoped_to_permissions(guardian, permission_types)
@@ -255,6 +288,7 @@ class Category < ActiveRecord::Base
       update_column(:topic_id, t.id)
       post = t.posts.build(raw: description || post_template, user: user)
       post.save!(validate: false)
+      update_column(:description, post.cooked) if description.present?
 
       t
     end
@@ -310,7 +344,12 @@ class Category < ActiveRecord::Base
       slug = SiteSetting.slug_generation_method == 'encoded' ? CGI.unescape(self.slug) : self.slug
       # sanitize the custom slug
       self.slug = Slug.sanitize(slug)
-      errors.add(:slug, 'is already in use') if duplicate_slug?
+
+      if self.slug.blank?
+        errors.add(:slug, :invalid)
+      elsif duplicate_slug?
+        errors.add(:slug, 'is already in use')
+      end
     else
       # auto slug
       self.slug = Slug.for(name, '')
@@ -739,22 +778,29 @@ class Category < ActiveRecord::Base
     end
   end
 
-  def self.find_by_slug(category_slug, parent_category_slug = nil)
-
-    return nil if category_slug.nil?
+  def self.find_by_slug_path(slug_path)
+    return nil if slug_path.empty?
+    return nil if slug_path.size > SiteSetting.max_category_nesting
 
     if SiteSetting.slug_generation_method == "encoded"
-      parent_category_slug = CGI.escape(parent_category_slug) unless parent_category_slug.nil?
-      category_slug = CGI.escape(category_slug)
+      slug_path.map! { |slug| CGI.escape(slug) }
     end
 
-    if parent_category_slug
-      parent_category_id = self.where(slug: parent_category_slug, parent_category_id: nil).select(:id)
+    query =
+      slug_path.inject(nil) do |parent_id, slug|
+        Category.where(
+          slug: slug,
+          parent_category_id: parent_id,
+        ).select(:id)
+      end
 
-      self.where(slug: category_slug, parent_category_id: parent_category_id).first
-    else
-      self.where(slug: category_slug, parent_category_id: nil).first
-    end
+    Category.find_by_id(query)
+  end
+
+  def self.find_by_slug(category_slug, parent_category_slug = nil)
+    return nil if category_slug.nil?
+
+    find_by_slug_path([parent_category_slug, category_slug].compact)
   end
 
   def subcategory_list_includes_topics?

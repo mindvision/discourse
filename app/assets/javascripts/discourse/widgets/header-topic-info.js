@@ -56,8 +56,27 @@ createWidget("topic-header-participant", {
 
 export default createWidget("header-topic-info", {
   tagName: "div.extra-info-wrapper",
+  contents: null,
+  title: null,
 
-  html(attrs, state) {
+  buildClasses(attrs, state) {
+    this.buildAttributes(attrs, state);
+    return this.containerClassName();
+  },
+
+  buildFancyTitleClass() {
+    const baseClass = ["topic-link"];
+    const flatten = array => [].concat.apply([], array);
+    const extraClass = flatten(
+      applyDecorators(this, "fancyTitleClass", this.attrs, this.state)
+    );
+    return baseClass
+      .concat(extraClass)
+      .filter(Boolean)
+      .join(" ");
+  },
+
+  buildAttributes(attrs, state) {
     const topic = attrs.topic;
 
     const heading = [];
@@ -87,7 +106,7 @@ export default createWidget("header-topic-info", {
       const titleHTML = new RawHtml({ html: `<span>${fancyTitle}</span>` });
       heading.push(
         this.attach("link", {
-          className: "topic-link",
+          className: this.buildFancyTitleClass(),
           action: "jumpToTopPost",
           href,
           attributes: { "data-topic-id": topic.get("id") },
@@ -96,13 +115,13 @@ export default createWidget("header-topic-info", {
       );
     }
 
-    const title = [h("h1.header-title", heading)];
+    this.title = [h("h1.header-title", heading)];
     const category = topic.get("category");
 
     if (loaded || category) {
       if (
         category &&
-        (!category.get("isUncategorizedCategory") ||
+        (!category.isUncategorizedCategory ||
           !this.siteSettings.suppress_uncategorized_badge)
       ) {
         const parentCategory = category.get("parentCategory");
@@ -114,7 +133,7 @@ export default createWidget("header-topic-info", {
         }
         categories.push(this.attach("category-link", { category }));
 
-        title.push(h("div.categories-wrapper", categories));
+        this.title.push(h("div.categories-wrapper", categories));
       }
 
       let extra = [];
@@ -184,16 +203,23 @@ export default createWidget("header-topic-info", {
         }
       }
       if (extra.length) {
-        title.push(h("div.topic-header-extra", extra));
+        this.title.push(h("div.topic-header-extra", extra));
       }
     }
 
-    const contents = h("div.title-wrapper", title);
+    this.contents = h("div.title-wrapper", this.title);
+  },
+
+  html() {
     return h(
       "div.extra-info",
-      { className: title.length > 1 ? "two-rows" : "" },
-      contents
+      { className: this.containerClassName() },
+      this.contents
     );
+  },
+
+  containerClassName() {
+    return this.title.length > 1 ? "two-rows" : "";
   },
 
   jumpToTopPost() {

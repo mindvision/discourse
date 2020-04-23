@@ -244,6 +244,8 @@ RSpec.configure do |config|
 
     RailsMultisite::ConnectionManagement.config_filename =
       "spec/fixtures/multisite/two_dbs.yml"
+
+    RailsMultisite::ConnectionManagement.establish_connection(db: 'default')
   end
 
   config.after(:each, type: :multisite) do
@@ -384,4 +386,27 @@ def silence_stdout
   yield
 ensure
   STDOUT.unstub(:write)
+end
+
+class TrackingLogger < ::Logger
+  attr_reader :messages
+  def initialize(level: nil)
+    super(nil)
+    @messages = []
+    @level = level
+  end
+  def add(*args, &block)
+    if !level || args[0].to_i >= level
+      @messages << args
+    end
+  end
+end
+
+def track_log_messages(level: nil)
+  old_logger = Rails.logger
+  logger = Rails.logger = TrackingLogger.new(level: level)
+  yield logger.messages
+  logger.messages
+ensure
+  Rails.logger = old_logger
 end

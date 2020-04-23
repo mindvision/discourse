@@ -1977,6 +1977,7 @@ export default {
     pinned: false,
     pinned_at: null,
     details: {
+      can_publish_page: true,
       can_invite_via_email: true,
       auto_close_at: null,
       auto_close_hours: null,
@@ -4059,7 +4060,6 @@ export default {
           alias_level: 99,
           visible: true,
           automatic_membership_email_domains: "",
-          automatic_membership_retroactive: false,
           primary_group: false,
           title: null,
           grant_trust_level: null,
@@ -4749,7 +4749,7 @@ export default {
     post_stream: {
       posts: [
         {
-          id: 398,
+          id: 98737532,
           name: null,
           username: "tim.lange",
           avatar_template: "/images/avatar.png",

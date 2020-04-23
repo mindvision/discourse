@@ -77,6 +77,7 @@ var define, requirejs;
       },
       "@ember/object/mixin": { default: Ember.Mixin },
       "@ember/object/proxy": { default: Ember.ObjectProxy },
+      "@ember/object/promise-proxy-mixin": { default: Ember.PromiseProxyMixin },
       "@ember/object/evented": {
         default: Ember.Evented,
         on: Ember.on
@@ -107,7 +108,6 @@ var define, requirejs;
       },
       rsvp: {
         default: Ember.RSVP,
-        EventTarget: Ember.RSVP.EventTarget,
         Promise: Ember.RSVP.Promise,
         hash: Ember.RSVP.hash,
         all: Ember.RSVP.all
