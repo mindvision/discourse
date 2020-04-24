@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Admin::GroupsController < Admin::AdminController
+  requires_login except: :create
+  skip_before_action :ensure_staff, only: :create
+
   def bulk
   end
 
