@@ -109,7 +109,7 @@ class GroupsController < ApplicationController
 
   def show
     respond_to do |format|
-      group = find_group(:id)
+      group = find_group(:id, ensure_can_see: false)
 
       format.html do
         @title = group.full_name.present? ? group.full_name.capitalize : group.name
