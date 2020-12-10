@@ -185,6 +185,7 @@ class DiscourseSingleSignOn < SingleSignOn
     # Use a mutex here to counter SSO requests that are sent at the same time w
     # the same email payload
     DistributedMutex.synchronize("discourse_single_sign_on_#{email}") do
+      Rails.logger.warn("Attempting to find User with email: #{email}")
       user = User.find_by_email(email) if !require_activation
       Rails.logger.warn("User found") if user
       if !user
