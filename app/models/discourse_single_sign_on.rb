@@ -186,7 +186,9 @@ class DiscourseSingleSignOn < SingleSignOn
     # the same email payload
     DistributedMutex.synchronize("discourse_single_sign_on_#{email}") do
       user = User.find_by_email(email) if !require_activation
+      Rails.logger.warn("User found") if user
       if !user
+        Rails.logger.warn("User not found, creating new User")
         try_name = name.presence
         try_username = username.presence
 
@@ -196,6 +198,8 @@ class DiscourseSingleSignOn < SingleSignOn
           username: UserNameSuggester.suggest(try_username || try_name || email),
           ip_address: ip_address
         }
+
+        Rails.logger.warn(user_params)
 
         if SiteSetting.allow_user_locale && locale && LocaleSiteSetting.valid_value?(locale)
           user_params[:locale] = locale
