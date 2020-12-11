@@ -107,7 +107,7 @@ createWidgetFrom(QuickAccessPanel, "quick-access-profile", {
     return {
       icon: "flag",
       href: Discourse.ScoutReturnPath,
-      content: 'Back To MyScout'
+      content: 'Back To Scouting At Home'
     };
   },
 });
