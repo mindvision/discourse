@@ -14,6 +14,9 @@
         <div class="panel clearfix">
           <%- unless current_user || local_assigns[:hide_auth_buttons] %>
             <span class='header-buttons'>
+              <%= link_to 'https://wa.scoutingathome.com.au/people/discourse_return_page' do %>
+                <%= image_tag "scouting_at_home_logo.png" %>
+              <% end %>
               <%- if can_sign_up? %>
                 <a href="<%= path "/signup"%>" class='btn btn-primary btn-small sign-up-button'><%= I18n.t('sign_up') %></a>
               <%- end %>
